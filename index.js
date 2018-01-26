@@ -60,9 +60,14 @@ setInterval(function () {
 								else
 									console.log('Could not push all items', result.errors);
 							});
-					})
-					.catch(deleted => {
-						deletedtxs = [];
+
+						//find txids that were deleted from mempool
+						let conf = [];
+						confirmed.forEach(c => {
+							conf.push(c.id);
+						});
+						let deleted = missing.filter(x => conf.indexOf(x) < 0);
+						let deletedtxs = [];
 						deleted.forEach(d => {
 							let t = {
 								id: d,
