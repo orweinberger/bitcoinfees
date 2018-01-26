@@ -12,7 +12,7 @@ bitcoind.getMempool()
 				if (result.items.length === mempool.length && result.errors === false)
 					console.log(`successfuly pushed ${mempool.length} items into Elasticsearch`)
 				else
-					console.log('Could not push all items', result.errors);
+					console.log('Could not push all items', result);
 			})
 			.catch(err => {
 				console.log('ES ERROR', err);
@@ -56,31 +56,7 @@ setInterval(function () {
 						elastic.bulkUpdate(confirmed)
 							.then(result => {
 								if (result.items.length === confirmed.length && result.errors === false)
-									console.log(`successfuly pushed ${confirmed.length} confirmed transactions into Elasticsearch`)
-								else
-									console.log('Could not push all items', result.errors);
-							});
-
-						//find txids that were deleted from mempool
-						let conf = [];
-						confirmed.forEach(c => {
-							conf.push(c.id);
-						});
-						let deleted = missing.filter(x => conf.indexOf(x) < 0);
-						let deletedtxs = [];
-						deleted.forEach(d => {
-							let t = {
-								id: d,
-								result: {
-									deleted: true
-								}
-							};
-							deletedtxs.push(t);
-						});
-						elastic.bulkUpdate(deletedtxs)
-							.then(result => {
-								if (result.items.length === deleted.length && result.errors === false)
-									console.log(`successfuly pushed ${deleted.length} deleted transactions into Elasticsearch`)
+									console.log(`successfuly pushed ${confirmed.length} confirmed and deleted transactions into Elasticsearch`)
 								else
 									console.log('Could not push all items', result.errors);
 							});
