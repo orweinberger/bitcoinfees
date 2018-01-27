@@ -9,10 +9,10 @@ services:
       - 9300
     environment:
       - bootstrap.memory_lock=true
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g -Djava.net.preferIPv4Stack=true
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g -Djava.net.preferIPv4Stack=true
     restart: always
-    mem_limit: 2gb
-    memswap_limit: 2gb
+    mem_limit: 4gb
+    memswap_limit: 4gb
     cap_add:
       - IPC_LOCK
     ulimits:
@@ -20,8 +20,7 @@ services:
         soft: -1
         hard: -1
       nofile: 65536
-    ports:
-      - 9200:9200
+    restart: always
   kibana:
     image: docker.elastic.co/kibana/kibana-oss:6.1.2
     expose:
@@ -30,11 +29,14 @@ services:
       - 5601:5601
     links:
       - elastic:elasticsearch
+    restart: always
   bitcoin:
     image: kylemanna/bitcoind:latest
     expose:
       - 8332
-    ports:
-      - 8332:8332
     volumes:
       - /data/.bitcoin:/bitcoin/.bitcoin
+    restart: always
+  fees:
+    build: .
+    restart: always

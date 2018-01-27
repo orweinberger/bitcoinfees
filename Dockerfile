@@ -1,11 +1,11 @@
 FROM node:8-alpine
 
-MAINTAINER Itay Weinberger "orweinberger@gmail.com"
+MAINTAINER Or Weinberger "orweinberger@gmail.com"
 
-COPY . /opt/bitparse
+COPY . /opt/bitcoinfees
 
 RUN \
-  cd /opt/bitparse && \
+  cd /opt/bitcoinfees && \
   npm install
 
 ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.0/dumb-init_1.2.0_amd64 /usr/local/bin/dumb-init
@@ -15,5 +15,5 @@ RUN chmod +x /usr/local/bin/dumb-init
 ENV NODE_ENV=production
 
 # Entrypoint
-WORKDIR /opt/bitparse
+WORKDIR /opt/bitcoinfees
 CMD ["dumb-init", "node", "index.js"]
