@@ -34,8 +34,6 @@ services:
     image: kylemanna/bitcoind:latest
     expose:
       - 8332
-    ports:
-      - 8332:8332
     volumes:
       - /data/.bitcoin:/bitcoin/.bitcoin
     restart: always

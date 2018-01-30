@@ -1,6 +1,6 @@
 FROM node:8-alpine
 
-MAINTAINER Itay Weinberger "orweinberger@gmail.com"
+MAINTAINER Or Weinberger "orweinberger@gmail.com"
 
 COPY . /opt/bitcoinfees
 
