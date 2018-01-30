@@ -1,5 +1,6 @@
 const bitcoind = require('./lib/bitcoind');
 const elastic = require('./lib/elastic');
+const chalk = require('chalk');
 let previous_mempool = [];
 let current_mempool = [];
 //initial build
@@ -13,14 +14,16 @@ bitcoind.getMempool()
 					console.log(`successfuly pushed ${mempool.length} items into Elasticsearch`)
 				else
 					console.log('Could not push all items', result);
+				setInterval(run, 60000);
 			})
 			.catch(err => {
-				console.log('ES ERROR', err);
+				console.log(chalk.red('Mempool is empty, bitcoin-core is probably still syncing... Sleeping for 5 minutes'));
+				setTimeout(process.exit, 300000);
 			});
 	});
 
 //Periodic build runs every minute
-setInterval(function () {
+function run() {
 	bitcoind.getMempool()
 		.then(txs => {
 			if (current_mempool.length === 0) {
@@ -29,8 +32,7 @@ setInterval(function () {
 				previous_mempool = current_mempool;
 				current_mempool = txs;
 			}
-			console.log('Previous count', previous_mempool.length);
-			console.log('Current count', current_mempool.length);
+			console.log(chalk.blue('Previous count: '), previous_mempool.length, chalk.green('Current count: '), current_mempool.length);
 
 			let new_txs = current_mempool.filter(x => previous_mempool.indexOf(x) < 0);
 			let missing = previous_mempool.filter(x => current_mempool.indexOf(x) < 0);
@@ -50,17 +52,17 @@ setInterval(function () {
 			}
 
 			if (missing.length > 0) {
-				//check if missing transaction is due to confirmation
+				//check if missing transaction is due to confirmation or deletion from mempool
 				bitcoind.gettxs(missing)
-					.then(confirmed => {
-						elastic.bulkUpdate(confirmed)
+					.then(confdel => {
+						elastic.bulkUpdate(confdel)
 							.then(result => {
-								if (result.items.length === confirmed.length && result.errors === false)
-									console.log(`successfuly pushed ${confirmed.length} confirmed and deleted transactions into Elasticsearch`)
+								if (result.items.length === confdel.length && result.errors === false)
+									console.log(`successfuly pushed ${confdel.length} confirmed and deleted transactions into Elasticsearch`)
 								else
 									console.log('Could not push all items', result.errors);
 							});
 					});
 			}
 		});
-}, 60000);
+}
